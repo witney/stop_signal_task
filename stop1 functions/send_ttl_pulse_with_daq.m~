@@ -1,0 +1,111 @@
+function [exp, varargout] = send_ttl_pulse_with_daq(exp,command, bits_for_pulse)
+% Commands used to send information to the CED micro through a daq
+%
+% [elapsed_time] = send_ttl_pulses_with_daq(command, command_param, show_fprintf_feedback)
+%
+% send_ttl_pulses_with_daq('initialize')
+%  Initializes the daq (must always issue first before other commands)
+%
+% send_ttl_pulses_with_daq('status')
+%  Get the current stats of the daq
+%
+% send_ttl_pulses_with_daq('triggers')
+%  sends a triggers to interface with biosemi
+
+%4/23/09 modified by Nicki Swann (and saved with new name) for biosemi
+%interface
+
+% Copyright 2008 Mike Claffey mclaffey@ucsd.edu
+
+% 10/02/08 error for not being able to find daq
+% 09/18/08 eliminated pulse time, added elapsed_time
+% 04/22/08 initial version
+
+    start_time = GetSecs();
+    
+    % this variable holds the index of the daq between calls of the
+    % function, so that DaqDeviceIndex (which takes about 5-7 ms) doesn't
+    % have to be run each time 
+    persistent daq_id
+
+    % this is a variable the indicates whether the initialize command was
+    % run. This ensures that experiments that use the daq initialize it at
+    % the begining of the experiment and address any errors that occur
+    % (e.g. daq isn't plugged in). Otherwise, the errors may occur when
+    % first trying to send codes later in the experiment, or they might not
+    % be noticed at all.
+    persistent was_properly_initialized
+    
+    % default values for paramters
+    if ~exist('command', 'var'), command='initialize'; end;
+    if ~exist('show_fprintf_feedback', 'var'), show_fprintf_feedback=1; end;
+    command = lower(command);
+
+    % constants
+    port_a = 0; % serial connector
+    config_for_ouput = 0;
+    config_for_input = 1; %#ok<NASGU>
+    all_bits_high = 255;
+   
+
+    
+%% initialization
+    switch command
+        case {'initialize', 'init', ''}
+            % find the daq
+            exp.daq_id = DaqDeviceIndex;
+            if isempty(daq_id)
+                error('Daq could not be found')
+            end
+            was_properly_initialized = true;
+
+            % configure both ports for output            
+            DaqDConfigPort(daq_id, port_a, config_for_ouput);
+           if show_fprintf_feedback
+                fprintf('Daq has been initialized with daq_id = %d\n', daq_id);
+            end
+        otherwise
+            % if the daq initialize command was not issued, complain
+            if isempty(exp.was_properly_initialized) || ~exp.was_properly_initialized
+                error('Daq must be initialized using send_ttl_pulses_with_daq(''initialize'') before any commands can be issued')
+            end
+            % if the daq could not be found, issue a warning and exit out of the function
+            if isempty(exp.daq_id)
+                warning('send_ttl_pulses_with_daq() could not find the Daq and will not be issuing commands') %#ok<WNTAG>
+                return
+            end
+    end
+
+    % now handle all possible commands
+    switch command
+        case {'initialize', 'init', ''}
+            % do nothing, already handled above
+            
+%% get status
+        case 'status'
+            DaqGetAll(exp.daq_id)
+        
+%% send ttl pulses      
+        case {'triggers'}
+            % go high and reset
+            DaqDOut(exp.daq_id, port_a, bits_for_pulse);
+            WaitSecs(.05);
+            DaqDOut(exp.daq_id, port_a, '00000000');
+
+
+
+
+%% otherwise
+        otherwise
+            error 'Invalid command supplied to send_ttl_pulses_with_daq()'
+    end
+
+%% return elapsed time, if requested
+
+    if nargout == 1
+        varargout = {GetSecs - start_time};
+    else
+        varargout = {};
+    end
+        
+end
