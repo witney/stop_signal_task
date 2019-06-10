@@ -3,14 +3,18 @@
 Visual stop signal task. Stop signal delays are adjusted with a staircase procedure.
 
 Setup:
+
 Runs on MATLAB using Psychtoolbox.
 If an external keypad or mouse is used for the button presses, it must be plugged in prior to starting.
 File to run the task is stop1.m
 
+
 Instructions for the subject:
+
 When you see left or right arrows, press the left or right buttons (1 or 0), respectively. In some trials, a stop signal will appear. Immediately halt any button presses, until the next arrow appears. You should prioritize speed over accuracy, as the task will adjust the difficultly based on your performance.
 
 Sample instructions for running the task using an external keypad
+
 1.	Run stop1.m
 2.	In the menu pop-up, click Initialize
     Use standard mode: ENTER
@@ -32,6 +36,7 @@ Sample instructions for running the task using an external keypad
 5.	There are 4 “mini sessions” per block, and you should run 2-3 blocks. Each time a mini session ends, you need to press the space bar to advance. Each time a block ends, you need to press the space bar 3 times to advance.
 
 Exiting the task
+
 Press and hold escape
 If you want to go back and run the task again, it will pick up where it left off
 To run the task from the beginning, you need to re-initialize first
