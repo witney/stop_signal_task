@@ -1,7 +1,5 @@
 # stop_signal_task
-Visual stop signal task. 
-
-Stop signal delays are adjusted with a staircase procedure.
+Visual stop signal task, with stop signal delays adjusted using a staircase procedure.
 
 ## Setup:
 Runs on MATLAB using Psychtoolbox.
